@@ -1,0 +1,130 @@
+/* src/components/Navbar.css */
+
+/* Tổng thể Navbar */
+.custom-navbar {
+  padding: 15px 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #dddddd;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.custom-navbar:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+.custom-logo {
+  height: 70px; /* Chiều cao logo */
+  width: auto; /* Giữ tỉ lệ logo */
+  transition: transform 0.3s ease;
+}
+
+.custom-logo:hover {
+  transform: scale(1.1); /* Phóng to nhẹ khi hover */
+}
+
+/* Links trong Navbar */
+.navbar-nav .nav-link {
+  font-size: 1rem;
+  color: #333333;
+  padding: 8px 15px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #28a745; /* Màu xanh lá khi hover */
+}
+
+/* Hiệu ứng underline khi hover */
+.navbar-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #28a745;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Badge giỏ hàng */
+.badge {
+  background-color: #28a745;
+  font-size: 0.85rem;
+  margin-left: 5px;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.badge:hover {
+  background-color: #1e7e34;
+  transform: scale(1.2);
+}
+
+/* Nút chuyển đổi chế độ sáng/tối */
+.toggle-dark-mode-btn {
+  background-color: #333333;
+  color: #ffffff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.toggle-dark-mode-btn:hover {
+  background-color: #444444;
+  transform: scale(1.05);
+}
+
+body.dark-mode .toggle-dark-mode-btn {
+  background-color: #dddddd;
+  color: #333333;
+}
+
+body.dark-mode .toggle-dark-mode-btn:hover {
+  background-color: #bbbbbb;
+}
+
+/* Hiệu ứng Dark Mode */
+body.dark-mode {
+  background-color: #121212; /* Nền tối */
+  color: #ffffff; /* Chữ trắng */
+}
+
+body.dark-mode .custom-navbar {
+  background-color: #333333; /* Navbar tối */
+}
+
+body.dark-mode .navbar-nav .nav-link {
+  color: #ffffff; /* Link trắng */
+}
+
+body.dark-mode .navbar-nav .nav-link:hover {
+  color: #28a745; /* Xanh lá khi hover */
+}
+
+/* Responsive Adjustments */
+
+/* Kích thước logo và text cho màn hình nhỏ */
+@media (max-width: 992px) {
+  .custom-logo {
+    height: 60px; /* Giảm kích thước logo */
+  }
+}
+
+@media (max-width: 576px) {
+  .custom-logo {
+    height: 50px; /* Kích thước nhỏ hơn nữa */
+  }
+
+  .navbar-nav .nav-link {
+    font-size: 0.9rem; /* Giảm kích thước chữ */
+  }
+}
