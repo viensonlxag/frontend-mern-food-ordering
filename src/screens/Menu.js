@@ -10,15 +10,15 @@ function Menu({ addToCart }) {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // API Base URL
   const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
+  console.log('API URL:', API_URL); // Log the API URL
 
   useEffect(() => {
-    // Fetch food items based on the search term
     const fetchFoodItems = async () => {
       setLoading(true);
       try {
         const response = await axios.get(`${API_URL}/fooditems?search=${searchTerm}`);
+        console.log('API Response:', response.data); // Log API response
         setFoodItems(response.data);
         setError('');
       } catch (error) {
@@ -35,7 +35,7 @@ function Menu({ addToCart }) {
   const handleSearch = (e) => {
     e.preventDefault();
     const newSearchTerm = e.target.elements.search.value.trim();
-    setSearchTerm(newSearchTerm); // Update search term and trigger API call
+    setSearchTerm(newSearchTerm); // Update the search term
   };
 
   return (
@@ -49,12 +49,12 @@ function Menu({ addToCart }) {
           placeholder="Tìm kiếm món ăn..."
           name="search"
           className="me-2"
-          defaultValue={searchTerm} // Show the current search term
+          defaultValue={searchTerm}
         />
         <Button type="submit" variant="primary">Tìm</Button>
       </Form>
 
-      {/* Loading Indicator */}
+      {/* Loading Spinner */}
       {loading && (
         <div className="d-flex justify-content-center">
           <Spinner animation="border" role="status">
@@ -66,12 +66,10 @@ function Menu({ addToCart }) {
       {/* Error Message */}
       {error && <Alert variant="danger">{error}</Alert>}
 
-      {/* No Items Found */}
+      {/* Food Items List */}
       {!loading && !error && foodItems.length === 0 && (
         <p className="text-center">Không tìm thấy món ăn nào phù hợp.</p>
       )}
-
-      {/* Display Food Items */}
       <Row>
         {foodItems.map((item) => (
           <Col key={item._id} sm={12} md={6} lg={4} className="mb-4">
