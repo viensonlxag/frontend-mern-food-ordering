@@ -9,16 +9,17 @@ function Menu({ addToCart }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [query, setQuery] = useState('');
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
-  console.log('API URL:', API_URL); // Log the API URL
+  console.log('API URL:', API_URL);
 
   useEffect(() => {
     const fetchFoodItems = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${API_URL}/fooditems?search=${searchTerm}`);
-        console.log('API Response:', response.data); // Log API response
+        const response = await axios.get(`${API_URL}/fooditems?search=${query}`);
+        console.log('API Response:', response.data);
         setFoodItems(response.data);
         setError('');
       } catch (error) {
@@ -30,12 +31,13 @@ function Menu({ addToCart }) {
     };
 
     fetchFoodItems();
-  }, [searchTerm, API_URL]);
+  }, [query, API_URL]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     const newSearchTerm = e.target.elements.search.value.trim();
-    setSearchTerm(newSearchTerm); // Update the search term
+    setSearchTerm(newSearchTerm); // Update search term
+    setQuery(newSearchTerm || ''); // Update query
   };
 
   return (
@@ -66,7 +68,7 @@ function Menu({ addToCart }) {
       {/* Error Message */}
       {error && <Alert variant="danger">{error}</Alert>}
 
-      {/* Food Items List */}
+      {/* Food Items */}
       {!loading && !error && foodItems.length === 0 && (
         <p className="text-center">Không tìm thấy món ăn nào phù hợp.</p>
       )}
