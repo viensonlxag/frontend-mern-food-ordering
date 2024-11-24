@@ -1,5 +1,3 @@
-// frontend/src/screens/CheckoutScreen.js
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,39 +16,22 @@ function CheckoutScreen({ cartItems, clearCart }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Initialize toast notifications (Không cần toast.configure())
-  useEffect(() => {
-    // Không cần gọi toast.configure() ở đây
-    // toast.configure(); // Loại bỏ dòng này
-  }, []);
-
   // Lấy thông tin người dùng và tính tổng giá trị giỏ hàng
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
-    console.log('Stored User:', storedUser);
     if (!storedUser) {
-      setError('Vui lòng đăng nhập trước khi thanh toán.');
       toast.error('Vui lòng đăng nhập trước khi thanh toán.');
       navigate('/login');
       return;
     }
+
     setUser(storedUser);
     setCustomerName(storedUser.name || '');
 
-    // Sử dụng cartItems prop trực tiếp
-    const updatedCartItems = cartItems.map((item) => ({
-      ...item,
-      quantity: item.quantity || 1,
-    }));
-
-    console.log('Cart Items:', updatedCartItems); // Log cart items
-    const calculatedTotal = updatedCartItems.reduce(
-      (total, item) => total + (item.price || 0) * item.quantity,
+    const calculatedTotal = cartItems.reduce(
+      (total, item) => total + (item.price || 0) * (item.quantity || 1),
       0
     );
-
-    console.log('Total Amount:', calculatedTotal); // Log totalAmount
-
     setTotalAmount(calculatedTotal);
   }, [cartItems, navigate]);
 
@@ -68,12 +49,12 @@ function CheckoutScreen({ cartItems, clearCart }) {
     }
 
     const orderData = {
-      userId: user._id, // Sử dụng _id
+      userId: user._id,
       items: cartItems.map((item) => ({
         foodItem: item._id,
         name: item.name,
         price: item.price,
-        quantity: item.quantity,
+        quantity: item.quantity || 1,
       })),
       totalPrice: totalAmount,
       customerName,
@@ -81,17 +62,15 @@ function CheckoutScreen({ cartItems, clearCart }) {
       phone,
     };
 
-    console.log('Prepared Order Data:', orderData);
-
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      setLoading(true);
+      const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api'; // URL mặc định cho Backend Render
       const response = await axios.post(`${API_URL}/orders/create`, orderData, {
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${user.token}` // Nếu backend yêu cầu token xác thực
         },
       });
-      console.log('Order Created:', response.data);
+
       toast.success('Thanh toán thành công! Đơn hàng của bạn đã được lưu.');
       clearCart();
       navigate('/orders');
@@ -99,6 +78,8 @@ function CheckoutScreen({ cartItems, clearCart }) {
       console.error('Lỗi khi thanh toán:', err.response?.data || err.message);
       setError(err.response?.data?.message || 'Đã xảy ra lỗi khi thực hiện thanh toán.');
       toast.error(err.response?.data?.message || 'Đã xảy ra lỗi khi thực hiện thanh toán.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,8 +131,8 @@ function CheckoutScreen({ cartItems, clearCart }) {
 
               <h5 className="mt-4">Tổng giá: {totalAmount.toLocaleString()} VND</h5>
 
-              <Button type="submit" variant="success" className="w-100 mt-3">
-                Thanh Toán
+              <Button type="submit" variant="success" className="w-100 mt-3" disabled={loading}>
+                {loading ? 'Đang xử lý...' : 'Thanh Toán'}
               </Button>
             </Form>
           </Card>
@@ -174,7 +155,7 @@ CheckoutScreen.propTypes = {
       _id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       price: PropTypes.number.isRequired,
-      quantity: PropTypes.number.isRequired,
+      quantity: PropTypes.number,
     })
   ).isRequired,
   clearCart: PropTypes.func.isRequired,

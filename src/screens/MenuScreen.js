@@ -11,55 +11,56 @@ import bannerImage3 from '../assets/images/banner3.jpg';
 function MenuScreen({ addToCart }) {
   const [foodItems, setFoodItems] = useState([]);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+  const [loading, setLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const query = new URLSearchParams(location.search).get('search') || ''; // Lấy từ khóa tìm kiếm từ URL
-  const [searchTerm, setSearchTerm] = useState('');
+  const query = new URLSearchParams(location.search).get('search') || '';
+  const [searchTerm, setSearchTerm] = useState(query); // Đồng bộ từ khóa tìm kiếm với URL
+
+  // Lấy URL API từ biến môi trường
+  const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
 
   useEffect(() => {
-    // Gọi API lấy danh sách món ăn (có thể có query tìm kiếm)
     const fetchFoodItems = async () => {
-      setLoading(true); // Bắt đầu trạng thái tải
+      setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/fooditems?search=${query}`);
+        const response = await axios.get(`${API_URL}/fooditems?search=${query}`);
         setFoodItems(response.data);
         setError('');
       } catch (error) {
         console.error('Có lỗi xảy ra khi lấy danh sách món ăn!', error);
         setError('Không thể tải danh sách món ăn. Vui lòng thử lại sau.');
       } finally {
-        setLoading(false); // Kết thúc trạng thái tải
+        setLoading(false);
       }
     };
 
     fetchFoodItems();
-  }, [query]); // Chạy lại mỗi khi query thay đổi
+  }, [query, API_URL]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    navigate(`/?search=${searchTerm.trim()}`); // Cập nhật URL với từ khóa tìm kiếm mới
+  };
 
   // Dữ liệu mẫu cho Carousel
   const carouselItems = [
     {
-      src: bannerImage1, // Sử dụng hình ảnh đã import
+      src: bannerImage1,
       alt: 'Banner 1',
       caption: 'Chào mừng đến với Nhà Hàng của Chúng Tôi!',
     },
     {
-      src: bannerImage2, // Sử dụng hình ảnh đã import
+      src: bannerImage2,
       alt: 'Banner 2',
       caption: 'Thực Đơn Đặc Sản Mới!',
     },
     {
-      src: bannerImage3, // Sử dụng hình ảnh đã import
+      src: bannerImage3,
       alt: 'Banner 3',
       caption: 'Ưu Đãi Đặc Biệt Trong Tháng!',
     },
   ];
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    // Chuyển hướng với query param mới
-    navigate(`/?search=${searchTerm}`);
-  };
 
   return (
     <Container className="my-4">
@@ -71,7 +72,7 @@ function MenuScreen({ addToCart }) {
               className="d-block w-100"
               src={item.src}
               alt={item.alt}
-              style={{ height: '500px', objectFit: 'cover' }} // Tăng chiều cao thành 500px
+              style={{ height: '500px', objectFit: 'cover' }}
             />
             <Carousel.Caption>
               <h3>{item.caption}</h3>

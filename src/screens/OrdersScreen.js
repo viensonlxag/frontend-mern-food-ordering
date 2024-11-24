@@ -1,7 +1,5 @@
-// frontend/src/screens/OrdersScreen.js
-
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Table, Alert, Spinner, Button } from 'react-bootstrap';
+import { Container, Table, Alert, Spinner, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import axios from 'axios';
@@ -13,27 +11,34 @@ function OrdersScreen({ user }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Lấy URL API từ biến môi trường
+  const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
+
   useEffect(() => {
     const fetchOrders = async () => {
       if (!user) {
-        setError('Bạn cần đăng nhập để xem đơn hàng.');
-        toast.error('Bạn cần đăng nhập để xem đơn hàng.');
+        setError('Bạn cần đăng nhập để xem danh sách đơn hàng.');
+        toast.error('Bạn cần đăng nhập để xem danh sách đơn hàng.');
         navigate('/login');
         return;
       }
 
       setLoading(true);
       try {
-        const apiUrl = `http://localhost:5000/api/orders/${user._id}`;
+        const apiUrl = `${API_URL}/orders/${user._id}`;
         console.log('Fetching orders from URL:', apiUrl);
-        const response = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         setOrders(response.data);
         setError('');
       } catch (err) {
         console.error('Có lỗi xảy ra khi lấy danh sách đơn hàng!', err);
-        if (err.response && err.response.status === 404) {
+        if (err.response?.status === 404) {
           setError('Không tìm thấy đơn hàng nào.');
-          toast.error('Không tìm thấy đơn hàng nào.');
+          toast.info('Không tìm thấy đơn hàng nào.');
         } else {
           setError('Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.');
           toast.error('Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.');
@@ -44,11 +49,11 @@ function OrdersScreen({ user }) {
     };
 
     fetchOrders();
-  }, [user, navigate]);
+  }, [user, navigate, API_URL]);
 
   return (
     <Container className="my-4 fade-in">
-      <h2>Đơn Hàng Của Tôi</h2>
+      <h2 className="mb-4">Đơn Hàng Của Tôi</h2>
       {loading ? (
         <div className="d-flex justify-content-center my-4">
           <Spinner animation="border" role="status">

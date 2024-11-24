@@ -1,7 +1,5 @@
-// src/screens/ContactScreen.js
-
 import React, { useState } from 'react';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios'; // Import Axios
 
 const ContactScreen = () => {
@@ -10,20 +8,28 @@ const ContactScreen = () => {
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Trạng thái đang gửi
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Bắt đầu trạng thái gửi
+    setError(null);
+    setSuccess(false);
+
     try {
       // Gửi dữ liệu liên hệ đến backend
-      await axios.post('http://localhost:5000/api/contact', { name, email, message });
+      const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
+      await axios.post(`${API_URL}/contact`, { name, email, message });
+
       setSuccess(true);
       setName('');
       setEmail('');
       setMessage('');
-      setError(null); // Xóa lỗi nếu có
     } catch (err) {
-      console.error('Lỗi khi gửi liên hệ:', err);
-      setError('Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại!');
+      console.error('Lỗi khi gửi liên hệ:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại!');
+    } finally {
+      setLoading(false); // Kết thúc trạng thái gửi
     }
   };
 
@@ -65,8 +71,22 @@ const ContactScreen = () => {
             required
           />
         </Form.Group>
-        <Button variant="primary" type="submit" className="w-100">
-          Gửi
+        <Button variant="primary" type="submit" className="w-100" disabled={loading}>
+          {loading ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+                className="me-2"
+              />
+              Đang gửi...
+            </>
+          ) : (
+            'Gửi'
+          )}
         </Button>
       </Form>
     </Container>

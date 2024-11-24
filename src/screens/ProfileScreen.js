@@ -1,4 +1,3 @@
-// ProfileScreen.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -11,30 +10,32 @@ function ProfileScreen({ user }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Lấy URL API từ biến môi trường
+  const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
+
   useEffect(() => {
-    // Kiểm tra nếu user chưa đăng nhập
-    if (!user || !user._id) { // Sử dụng _id thay vì id
+    if (!user || !user._id) {
       setError('Người dùng chưa đăng nhập.');
       toast.error('Người dùng chưa đăng nhập.');
-      navigate('/login'); // Chuyển hướng đến trang đăng nhập nếu không có user
+      navigate('/login');
       return;
     }
 
-    // Lấy thông tin cá nhân
-    console.log('Fetching profile for user ID:', user._id); // Sử dụng _id
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-    axios
-      .get(`${API_URL}/users/profile/${user._id}`) // Sử dụng _id và biến môi trường
-      .then(({ data }) => {
-        console.log('Profile data:', data); // Log dữ liệu nhận được
-        setProfile(data);
-      })
-      .catch((err) => {
-        console.error('Profile Error:', err.response?.data || err.message); // Log lỗi
-        setError(err.response?.data?.message || 'Đã xảy ra lỗi.');
-        toast.error(err.response?.data?.message || 'Đã xảy ra lỗi.');
-      });
-  }, [user, navigate]);
+    const fetchProfile = async () => {
+      try {
+        console.log('Fetching profile for user ID:', user._id);
+        const response = await axios.get(`${API_URL}/users/profile/${user._id}`);
+        console.log('Profile data:', response.data);
+        setProfile(response.data);
+      } catch (err) {
+        console.error('Profile Error:', err.response?.data || err.message);
+        setError(err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin cá nhân.');
+        toast.error(err.response?.data?.message || 'Đã xảy ra lỗi khi tải thông tin cá nhân.');
+      }
+    };
+
+    fetchProfile();
+  }, [user, navigate, API_URL]);
 
   if (error) {
     return (
@@ -58,8 +59,12 @@ function ProfileScreen({ user }) {
   return (
     <Container className="my-4">
       <h2>Thông Tin Cá Nhân</h2>
-      <p><strong>Tên:</strong> {profile.name}</p>
-      <p><strong>Email:</strong> {profile.email}</p>
+      <p>
+        <strong>Tên:</strong> {profile.name}
+      </p>
+      <p>
+        <strong>Email:</strong> {profile.email}
+      </p>
       {/* Thêm các thông tin khác nếu cần */}
     </Container>
   );
@@ -67,10 +72,9 @@ function ProfileScreen({ user }) {
 
 ProfileScreen.propTypes = {
   user: PropTypes.shape({
-    _id: PropTypes.string.isRequired, // Sử dụng _id thay vì id
+    _id: PropTypes.string.isRequired,
     name: PropTypes.string,
     email: PropTypes.string,
-    // Thêm các trường khác nếu cần
   }).isRequired,
 };
 

@@ -1,64 +1,53 @@
-// frontend/src/screens/LoginScreen.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Form, Button, Container, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { toast } from 'react-toastify'; // Import toast từ react-toastify
+import { toast } from 'react-toastify';
 
 function LoginScreen({ setUser }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Lấy URL API từ biến môi trường
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // Bắt đầu trạng thái tải
-    setError(''); // Xóa lỗi trước đó
+    setLoading(true);
+    setError('');
 
     try {
+      // Gửi yêu cầu đăng nhập
       const response = await axios.post(`${API_URL}/users/login`, { email, password });
-      console.log('Login Response:', response.data); // Kiểm tra cấu trúc của response.data.user
 
       // Lưu thông tin người dùng vào localStorage
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      // Cập nhật trạng thái người dùng trong ứng dụng
+      // Cập nhật trạng thái người dùng
       setUser(response.data.user);
 
-      // Hiển thị thông báo thành công và chuyển hướng khi toast đóng
-      toast.success('Đăng nhập thành công!', { // Hiển thị toast thành công
-        position: "top-right",
-        autoClose: 1000, // Tự động đóng sau 3 giây
+      // Hiển thị thông báo thành công và chuyển hướng
+      toast.success('Đăng nhập thành công!', {
+        position: 'top-right',
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        progress: undefined,
-        onClose: () => {
-          console.log('Toast đã đóng, chuyển hướng...');
-          navigate('/'); // Chuyển hướng khi toast đóng
-        }, 
+        onClose: () => navigate('/'), // Chuyển hướng sau khi toast đóng
       });
-
-      // Không cần setTimeout nữa
     } catch (error) {
       console.error('Login Error:', error.response || error.message);
-      // Hiển thị thông báo lỗi
-      toast.error(error.response?.data?.message || 'Đã xảy ra lỗi');
-
-      // Cập nhật trạng thái lỗi để hiển thị Alert (nếu cần)
       setError(error.response?.data?.message || 'Đã xảy ra lỗi');
-
-      // Làm sạch trường mật khẩu để bảo mật
-      setPassword('');
+      toast.error(error.response?.data?.message || 'Đã xảy ra lỗi', {
+        position: 'top-right',
+        autoClose: 2000,
+      });
+      setPassword(''); // Xóa mật khẩu để bảo mật
     } finally {
       setLoading(false); // Kết thúc trạng thái tải
     }
@@ -66,8 +55,8 @@ function LoginScreen({ setUser }) {
 
   return (
     <Container className="my-4" style={{ maxWidth: '500px' }}>
-      <h2 className="mb-4">Đăng Nhập</h2>
-      {error && <div className="alert alert-danger">{error}</div>} {/* Sử dụng Alert từ Bootstrap */}
+      <h2 className="mb-4 text-center">Đăng Nhập</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
       <Form onSubmit={handleLogin}>
         <Form.Group controlId="email" className="mb-3">
           <Form.Label>Email:</Form.Label>
@@ -108,7 +97,6 @@ function LoginScreen({ setUser }) {
           )}
         </Button>
       </Form>
-      {/* Không cần ToastContainer ở đây */}
     </Container>
   );
 }

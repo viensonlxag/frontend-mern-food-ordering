@@ -1,5 +1,3 @@
-// frontend/src/screens/Menu.js
-
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
@@ -11,13 +9,18 @@ function Menu({ addToCart }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [query, setQuery] = useState(''); // Lưu từ khóa thực tế dùng để gọi API
+
+  // Lấy URL API từ biến môi trường
+  const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
 
   useEffect(() => {
     // Gọi API lấy danh sách món ăn
     const fetchFoodItems = async () => {
+      if (query === '') return; // Không gọi API nếu query rỗng
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/fooditems?search=${searchTerm}`);
+        const response = await axios.get(`${API_URL}/fooditems?search=${query}`);
         setFoodItems(response.data);
         setError('');
       } catch (error) {
@@ -29,12 +32,15 @@ function Menu({ addToCart }) {
     };
 
     fetchFoodItems();
-  }, [searchTerm]);
+  }, [query, API_URL]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Kích hoạt tìm kiếm với từ khóa mới
-    setSearchTerm(e.target.elements.search.value);
+    const newSearchTerm = e.target.elements.search.value.trim();
+    if (newSearchTerm !== searchTerm) {
+      setSearchTerm(newSearchTerm); // Cập nhật từ khóa
+      setQuery(newSearchTerm); // Gửi request với từ khóa mới
+    }
   };
 
   return (
@@ -48,6 +54,7 @@ function Menu({ addToCart }) {
           placeholder="Tìm kiếm món ăn..."
           name="search"
           className="me-2"
+          defaultValue={searchTerm} // Hiển thị từ khóa hiện tại
         />
         <Button type="submit" variant="primary">Tìm</Button>
       </Form>
@@ -65,16 +72,15 @@ function Menu({ addToCart }) {
       {error && <Alert variant="danger">{error}</Alert>}
 
       {/* Hiển thị danh sách món ăn */}
+      {!loading && !error && foodItems.length === 0 && (
+        <p className="text-center">Không tìm thấy món ăn nào phù hợp.</p>
+      )}
       <Row>
-        {foodItems.length === 0 && !loading && !error ? (
-          <p>Không tìm thấy món ăn nào.</p>
-        ) : (
-          foodItems.map((item) => (
-            <Col key={item._id} sm={12} md={6} lg={4} className="mb-4">
-              <FoodItem item={item} addToCart={addToCart} />
-            </Col>
-          ))
-        )}
+        {foodItems.map((item) => (
+          <Col key={item._id} sm={12} md={6} lg={4} className="mb-4">
+            <FoodItem item={item} addToCart={addToCart} />
+          </Col>
+        ))}
       </Row>
     </Container>
   );

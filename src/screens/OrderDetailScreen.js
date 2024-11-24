@@ -12,6 +12,9 @@ function OrderDetailScreen({ user }) {
   const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
   const [error, setError] = useState(''); // Trạng thái lưu lỗi
 
+  // Lấy URL API từ biến môi trường
+  const API_URL = process.env.REACT_APP_API_URL || 'https://backend-mern-food-ordering.onrender.com/api';
+
   useEffect(() => {
     const fetchOrder = async () => {
       if (!user) {
@@ -23,12 +26,14 @@ function OrderDetailScreen({ user }) {
 
       setLoading(true);
       try {
-        // API endpoint cho đơn hàng
-        const apiUrl = `http://localhost:5000/api/orders/${id}/detail?userId=${user._id}`;
+        const apiUrl = `${API_URL}/orders/${id}/detail?userId=${user._id}`;
         console.log('Fetching order from URL:', apiUrl);
 
-        // Gửi yêu cầu đến API
-        const response = await axios.get(apiUrl);
+        const response = await axios.get(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
         setOrder(response.data); // Lưu dữ liệu đơn hàng
         setError('');
@@ -51,7 +56,7 @@ function OrderDetailScreen({ user }) {
     };
 
     fetchOrder();
-  }, [id, user, navigate]);
+  }, [id, user, navigate, API_URL]);
 
   if (loading) {
     return (
@@ -64,11 +69,19 @@ function OrderDetailScreen({ user }) {
   }
 
   if (error) {
-    return <Alert variant="danger">{error}</Alert>;
+    return (
+      <Container className="my-4">
+        <Alert variant="danger">{error}</Alert>
+      </Container>
+    );
   }
 
   if (!order) {
-    return <p>Không tìm thấy đơn hàng.</p>;
+    return (
+      <Container className="my-4">
+        <p>Không tìm thấy đơn hàng.</p>
+      </Container>
+    );
   }
 
   return (

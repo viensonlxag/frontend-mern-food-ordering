@@ -1,13 +1,26 @@
-// frontend/src/screens/CartScreen.js
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Container, Table, Button, Alert } from 'react-bootstrap';
+import { Container, Table, Button, Alert, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 function CartScreen({ cartItems, addToCart, decreaseQuantity, removeFromCart, clearCart }) {
+  const [showConfirm, setShowConfirm] = useState(false); // Trạng thái hiển thị modal xác nhận
+
   // Tính tổng giá trị giỏ hàng
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  // Hiển thị modal xác nhận
+  const handleClearCart = () => setShowConfirm(true);
+
+  // Xác nhận xóa giỏ hàng
+  const confirmClearCart = () => {
+    clearCart();
+    setShowConfirm(false);
+  };
+
+  // Hủy xác nhận xóa giỏ hàng
+  const cancelClearCart = () => setShowConfirm(false);
 
   return (
     <Container className="my-4">
@@ -38,6 +51,7 @@ function CartScreen({ cartItems, addToCart, decreaseQuantity, removeFromCart, cl
                       variant="secondary"
                       size="sm"
                       onClick={() => decreaseQuantity(item._id)}
+                      disabled={item.quantity <= 1} // Vô hiệu hóa khi số lượng <= 1
                       className="me-2"
                     >
                       -
@@ -75,7 +89,7 @@ function CartScreen({ cartItems, addToCart, decreaseQuantity, removeFromCart, cl
               <Button
                 variant="danger"
                 className="me-3"
-                onClick={clearCart}
+                onClick={handleClearCart} // Hiển thị modal xác nhận
               >
                 Làm sạch giỏ hàng
               </Button>
@@ -90,6 +104,22 @@ function CartScreen({ cartItems, addToCart, decreaseQuantity, removeFromCart, cl
           </div>
         </>
       )}
+
+      {/* Modal xác nhận xóa giỏ hàng */}
+      <Modal show={showConfirm} onHide={cancelClearCart} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng không?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancelClearCart}>
+            Hủy
+          </Button>
+          <Button variant="danger" onClick={confirmClearCart}>
+            Xóa
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
