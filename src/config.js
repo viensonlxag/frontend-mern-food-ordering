@@ -1,1 +1,2 @@
-export const API_BASE_URL = 'http://localhost:5000'; // Hoặc URL của API backend
+const API_URL = "https://backend-mern-food-ordering.onrender.com";
+export default API_URL;
